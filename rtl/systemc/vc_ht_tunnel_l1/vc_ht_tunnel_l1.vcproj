@@ -159,6 +159,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\misc_logic_l2.cpp">
+			</File>
+			<File
 				RelativePath="vc_ht_tunnel_l1.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -859,6 +862,9 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
+			<File
+				RelativePath=".\misc_logic_l2.h">
+			</File>
 			<File
 				RelativePath="vc_ht_tunnel_l1.h">
 			</File>

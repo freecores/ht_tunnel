@@ -83,6 +83,8 @@ int sc_main( int argc, char* argv[] ){
 	sc_signal<bool>					lk_disable_drivers_phy;
 	sc_signal<bool>					lk_disable_receivers_phy;
 
+	sc_signal<bool>					lk_ldtstop_disconnected;
+
 	/**
 		Data to be sent to the next link
 		This data comes from the flow control
@@ -201,6 +203,7 @@ int sc_main( int argc, char* argv[] ){
 	dut->phy_consume_lk(phy_consume_lk);
 	dut->lk_disable_drivers_phy(lk_disable_drivers_phy);
 	dut->lk_disable_receivers_phy(lk_disable_receivers_phy);
+	dut->lk_ldtstop_disconnected(lk_ldtstop_disconnected);
 	dut->fc_dword_lk(fc_dword_lk);
 	dut->fc_lctl_lk(fc_lctl_lk);
 	dut->fc_hctl_lk(fc_hctl_lk);

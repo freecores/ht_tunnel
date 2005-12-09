@@ -42,25 +42,6 @@
 #include "../core_synth/synth_datatypes.h"
 #include "../core_synth/constants.h"
 
-///Number of cycles in 1 us
-#define NUMBER_CYCLES_1_US 200
-///Number of cycles in 50 us
-#define NUMBER_CYCLES_50_US 10000
-///Number of bits to count up to NUMBER_CYCLES_1_US
-#define NUMBER_BITS_REPRESENT_1US_MIN9 9
-///This is the number of bits to count up to NUMBER_CYCLES_1_US minus one
-/**The following is for less than 1us for the receiver ignore count because
-the receiver must ignore the input less time than the full 1 us of link init
-or it will miss the beginning of the init sequence*/
-#define NUMBER_BITS_REPRESENT_1US_M1 7
-///The number of cycles inside a ms
-#define NUMBER_CYCLES_1_MS 200000
-///The number of cycles inside a s
-#define NUMBER_CYCLES_1_S 200000000
-///The number of bits neede to count up to NUMBER_CYCLES_1_S
-#define NUMBER_BITS_REPRESENT_1S 28
-
-
 
 #define CRC_POLY 0x04C11DB7
 
@@ -174,6 +155,9 @@ public:
 	sc_out<bool>					lk_disable_drivers_phy;
 	///To disable the receivers to save power
 	sc_out<bool>					lk_disable_receivers_phy;
+
+	///When the link is completely disconnected for LDTSTOP
+	sc_out<bool>					lk_ldtstop_disconnected;
 
 	///Register to keep the current calculated RX CRC
 	sc_signal<sc_uint<32> >		rx_crc;
@@ -414,6 +398,12 @@ public:
 		See ::tx_output_selection for possible values of ::transmit_select
 	*/
 	void select_output();
+
+	/**
+		Output the signal ldtstop_disconnect_tx signal to the output lk_ldtstop_disconnected.
+		Yes, a process that ONLY does that!
+	*/
+	void output_ldtstop_disconnected();
 
 	///AND gate betweem ::framed_data_available and ::framed_data_ready
 	void output_framed_data();

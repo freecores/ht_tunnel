@@ -86,6 +86,8 @@ int sc_main( int argc, char* argv[] )
 	sc_signal<bool> 		lk0_disable_drivers_phy0;
 	sc_signal<bool> 		lk0_disable_receivers_phy0;
 
+	sc_signal<sc_bv<4> > link_frequency0_phy;
+
 #ifndef INTERNAL_SHIFTER_ALIGNMENT
 	///High speed deserializer should stall shifting bits for lk_deser_stall_cycles_phy cycles
 	/** Cannot be asserted with a lk_deser_stall_cycles_phy value of 0*/
@@ -107,6 +109,8 @@ int sc_main( int argc, char* argv[] )
 	
 	sc_signal<bool> 		lk1_disable_drivers_phy1;
 	sc_signal<bool> 		lk1_disable_receivers_phy1;
+
+	sc_signal<sc_bv<4> > link_frequency1_phy;
 
 #ifndef INTERNAL_SHIFTER_ALIGNMENT
 	///High speed deserializer should stall shifting bits for lk_deser_stall_cycles_phy cycles
@@ -331,6 +335,8 @@ int sc_main( int argc, char* argv[] )
 	the_ht_tunnel->lk0_disable_drivers_phy0(lk0_disable_drivers_phy0);
 	the_ht_tunnel->lk0_disable_receivers_phy0(lk0_disable_receivers_phy0);
 
+	the_ht_tunnel->link_frequency0_phy(link_frequency0_phy);
+
 #ifndef INTERNAL_SHIFTER_ALIGNMENT
 	the_ht_tunnel->lk0_deser_stall_phy0(lk0_deser_stall_phy0);
 	the_ht_tunnel->lk0_deser_stall_cycles_phy0(lk0_deser_stall_cycles_phy0);
@@ -344,6 +350,8 @@ int sc_main( int argc, char* argv[] )
 	
 	the_ht_tunnel->lk1_disable_drivers_phy1(lk1_disable_drivers_phy1);
 	the_ht_tunnel->lk1_disable_receivers_phy1(lk1_disable_receivers_phy1);
+
+	the_ht_tunnel->link_frequency1_phy(link_frequency1_phy);
 
 #ifndef INTERNAL_SHIFTER_ALIGNMENT
 	the_ht_tunnel->lk1_deser_stall_phy1(lk1_deser_stall_phy1);

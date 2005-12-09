@@ -315,6 +315,8 @@ int sc_main( int argc, char* argv[] ){
 	sc_signal<sc_bv<3> > csr_rx_link_width_lk0;
 	/** Signal from register Interface->LinkConfiguration_0->csr_tx_link_width_lk0 */
 	sc_signal<sc_bv<3> > csr_tx_link_width_lk0;
+	/** Signal from register Interface->Link Freq 0 */
+	sc_signal<sc_bv<4> >csr_link_frequency0;
 	/** Signal from register Interface->LinkControl_1->csr_crc_force_error_lk1 */
 	sc_signal<bool> csr_crc_force_error_lk1;
 	/** Signal from register Interface->LinkControl_1->csr_end_of_chain1 */
@@ -329,6 +331,8 @@ int sc_main( int argc, char* argv[] ){
 	sc_signal<sc_bv<3> > csr_rx_link_width_lk1;
 	/** Signal from register Interface->LinkConfiguration_1->csr_tx_link_width_lk1 */
 	sc_signal<sc_bv<3> > csr_tx_link_width_lk1;
+	/** Signal from register Interface->Link Freq 1 */
+	sc_signal<sc_bv<4> >csr_link_frequency1;
 	/** Signal from register Interface->LinkError_0->csr_extended_ctl_timeout_lk0 */
 	sc_signal<bool> csr_extended_ctl_timeout_lk0;
 #ifdef ENABLE_REORDERING
@@ -494,6 +498,7 @@ int sc_main( int argc, char* argv[] ){
 	dut->csr_extented_ctl_lk0(csr_extented_ctl_lk0);
 	dut->csr_rx_link_width_lk0(csr_rx_link_width_lk0);
 	dut->csr_tx_link_width_lk0(csr_tx_link_width_lk0);
+	dut->csr_link_frequency0(csr_link_frequency0);
 	dut->csr_crc_force_error_lk1(csr_crc_force_error_lk1);
 	dut->csr_end_of_chain1(csr_end_of_chain1);
 	dut->csr_transmitter_off_lk1(csr_transmitter_off_lk1);
@@ -501,6 +506,7 @@ int sc_main( int argc, char* argv[] ){
 	dut->csr_extented_ctl_lk1(csr_extented_ctl_lk1);
 	dut->csr_rx_link_width_lk1(csr_rx_link_width_lk1);
 	dut->csr_tx_link_width_lk1(csr_tx_link_width_lk1);
+	dut->csr_link_frequency1(csr_link_frequency1);
 	dut->csr_extended_ctl_timeout_lk0(csr_extended_ctl_timeout_lk0);
 #ifdef ENABLE_REORDERING
 	dut->csr_unitid_reorder_disable(csr_unitid_reorder_disable);

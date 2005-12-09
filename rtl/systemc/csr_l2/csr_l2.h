@@ -407,6 +407,8 @@ public:
 	sc_out<sc_bv<3> > csr_rx_link_width_lk0;
 	/** Signal from register Interface->LinkConfiguration_0->csr_tx_link_width_lk0 */
 	sc_out<sc_bv<3> > csr_tx_link_width_lk0;
+	/** Signal from register Interface->Link Freq 0 */
+	sc_out<sc_bv<4> >csr_link_frequency0;
 	/** Signal from register Interface->LinkControl_1->csr_crc_force_error_lk1 */
 	sc_out<bool> csr_crc_force_error_lk1;
 	/** Signal from register Interface->LinkControl_1->csr_end_of_chain1 */
@@ -421,6 +423,8 @@ public:
 	sc_out<sc_bv<3> > csr_rx_link_width_lk1;
 	/** Signal from register Interface->LinkConfiguration_1->csr_tx_link_width_lk1 */
 	sc_out<sc_bv<3> > csr_tx_link_width_lk1;
+	/** Signal from register Interface->Link Freq 1 */
+	sc_out<sc_bv<4> >csr_link_frequency1;
 	/** Signal from register Interface->LinkError_0->csr_extended_ctl_timeout_lk0 */
 	sc_out<bool> csr_extended_ctl_timeout_lk0;
 #ifdef ENABLE_REORDERING

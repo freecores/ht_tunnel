@@ -215,6 +215,9 @@ vc_ht_tunnel_l1::vc_ht_tunnel_l1(sc_module_name name) : sc_module(name){
 	the_csr_l2->csr_initcomplete0(csr_initcomplete0);
 	the_csr_l2->csr_initcomplete1(csr_initcomplete1);
 
+	the_csr_l2->csr_link_frequency0(csr_link_frequency0);
+	the_csr_l2->csr_link_frequency1(csr_link_frequency1);
+
 	the_csr_l2->csr_request_databuffer0_access_ui(csr_request_databuffer0_access_ui);
 	the_csr_l2->csr_request_databuffer1_access_ui(csr_request_databuffer1_access_ui);
 	the_csr_l2->ui_databuffer_access_granted_csr(ui_databuffer_access_granted_csr);
@@ -1002,6 +1005,8 @@ vc_ht_tunnel_l1::vc_ht_tunnel_l1(sc_module_name name) : sc_module(name){
 
 	the_link0_l2->lk_disable_drivers_phy(lk0_disable_drivers_phy0);
 	the_link0_l2->lk_disable_receivers_phy(lk0_disable_receivers_phy0);
+
+	the_link0_l2->lk_ldtstop_disconnected(lk0_ldtstop_disconnected);
 	
 	//**************************************
 	// Link 1 linkage
@@ -1087,67 +1092,57 @@ vc_ht_tunnel_l1::vc_ht_tunnel_l1(sc_module_name name) : sc_module(name){
 
 	the_link1_l2->lk_disable_drivers_phy(lk1_disable_drivers_phy1);
 	the_link1_l2->lk_disable_receivers_phy(lk1_disable_receivers_phy1);
+	the_link1_l2->lk_ldtstop_disconnected(lk1_ldtstop_disconnected);
 
-	SC_METHOD(register_signals);
-	sensitive_pos(clk);
-	sensitive_neg(resetx);
-	
-	SC_METHOD(find_clumped_ids);
-	sensitive_pos(clk);
-	sensitive_neg(resetx);
-}
+	//**************************************
+	// Misc logic linkage
+	//**************************************
 
-void vc_ht_tunnel_l1::register_signals(){
-	if(!resetx.read()){
-		registered_ldtstopx = true;
-		registered1_ldtstopx = true;
-	}
-	else{
-		//Two registers back to back to prevent asynchronous anomalies
-		registered1_ldtstopx = ldtstopx;
-		registered_ldtstopx = registered1_ldtstopx;
-	}
-}
+	the_misc_logic_l2 = new misc_logic_l2("the_misc_logic_l2");
 
-// This function calculates to which unitID clump does the unitID belongs.
-void vc_ht_tunnel_l1::find_clumped_ids(){
+	the_misc_logic_l2->clk(clk);
+	the_misc_logic_l2->resetx(resetx);
+	the_misc_logic_l2->pwrok(pwrok);
+	the_misc_logic_l2->ldtstopx(ldtstopx);
+	the_misc_logic_l2->lk0_ldtstop_disconnected(lk0_ldtstop_disconnected);
+	the_misc_logic_l2->lk1_ldtstop_disconnected(lk1_ldtstop_disconnected);
+	the_misc_logic_l2->csr_link_frequency0(csr_link_frequency0);
+	the_misc_logic_l2->csr_link_frequency1(csr_link_frequency1);
+	the_misc_logic_l2->link_frequency0_phy(link_frequency0_phy);
+	the_misc_logic_l2->link_frequency1_phy(link_frequency1_phy);
+	the_misc_logic_l2->csr_clumping_configuration(csr_clumping_configuration);
+	the_misc_logic_l2->registered_ldtstopx(registered_ldtstopx);
 
-	if(!resetx.read()){
-		clumped_unit_id[0] = 0;
 #ifdef ENABLE_REORDERING
-		for (int i=1; i <  32;i++)
-			clumped_unit_id[i] = i;
+	for(int n = 0; n < 32; n++){
 #else
-		for (int i=1; i < 4;i++)
-			clumped_unit_id[i] = i;
+	for(int n = 0; n < 4; n++){
 #endif
-	}
-	else{
-		clumped_unit_id[0] = 0;
-		/**
-			We generate a new "Clumped_UnitID", which is not the original
-			unique ID, but uniquely identifies in which "clump" the unitID
-			is.  Ex., if 1 to 3 are clumped together, the unitID 0 is in
-			Clumped_UnitID 0, 1 to 3 are in 1, 4 is in 2, etc.
-		*/
-		
-#ifdef ENABLE_REORDERING
-		for (int i=1; i < 32;i++)
-#else
-		for (int i=1; i < 4;i++)
-#endif
-		{
-			/**
-				There is a 32 bits clumping configuration vector : one bit per
-				unitID.  If a bit is 1, it means that the unitID is clumped with
-				the previous one.  So we simply increase the unitID_Clumped value
-				everytime we encounter a 0 bit, until we reach our target unitID.
-			*/
-			if (csr_clumping_configuration.read()[i] == false)
-				clumped_unit_id[i] = i;
-			else
-				clumped_unit_id[i] = clumped_unit_id[i-1];
-		}
+		the_misc_logic_l2->clumped_unit_id[n](clumped_unit_id[n]);
 	}
 }
+
+#ifdef SYSTEMC_SIM
+vc_ht_tunnel_l1::~vc_ht_tunnel_l1(){
+	delete the_decoder0_l2;
+	delete the_databuffer0_l2;
+	delete the_flow_control0_l2;
+	delete the_link0_l2;
+	delete the_errorhandler0_l2;	
+	delete the_reordering0_l2;
+
+	delete the_decoder1_l2;
+	delete the_databuffer1_l2;
+	delete the_flow_control1_l2;
+	delete the_link1_l2;
+	delete the_errorhandler1_l2;	
+	delete the_reordering1_l2;
+
+	//Shared
+	delete the_csr_l2;
+	delete the_userinterface_l2;
+	delete the_misc_logic_l2;
+}
+#endif
+
 

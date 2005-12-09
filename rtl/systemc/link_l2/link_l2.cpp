@@ -60,6 +60,9 @@ link_l2::link_l2( sc_module_name name) : sc_module(name) {
 	SC_METHOD(evaluate_tx_crc_process);
 	sensitive_pos(clk);
 	sensitive_neg(resetx);
+
+	SC_METHOD(output_ldtstop_disconnected);
+	sensitive << ldtstop_disconnect_tx;
 	
 	SC_METHOD(select_output);
 	sensitive << transmit_select << tx_last_crc << 
@@ -929,4 +932,7 @@ void link_l2::output_framed_data(){
 	lk_available_cd = framed_data_available.read() && framed_data_ready.read();
 }
 
+void link_l2::output_ldtstop_disconnected(){
+	lk_ldtstop_disconnected = ldtstop_disconnect_tx;
+}
 

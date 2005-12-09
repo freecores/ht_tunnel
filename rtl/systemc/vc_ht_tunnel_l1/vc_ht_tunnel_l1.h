@@ -51,6 +51,7 @@
 #include "../link_l2/link_l2.h"
 #include "../errorhandler_l2/errorhandler_l2.h"
 #include "../csr_l2/csr_l2.h"
+#include "misc_logic_l2.h"
 
 ///	Top level module of the HyperTransport tunnel.
 /**
@@ -147,6 +148,9 @@ class vc_ht_tunnel_l1 : public sc_module
 	sc_out<bool> 		lk0_disable_drivers_phy0;
 	///To disable the receivers to save power
 	sc_out<bool> 		lk0_disable_receivers_phy0;
+	///Frequency requested to clocking logic for side 0
+	sc_out<sc_bv<4> > link_frequency0_phy;
+
 #ifndef INTERNAL_SHIFTER_ALIGNMENT
 	///High speed deserializer should stall shifting bits for lk_deser_stall_cycles_phy cycles
 	/** Cannot be asserted with a lk_deser_stall_cycles_phy value of 0*/
@@ -193,6 +197,9 @@ class vc_ht_tunnel_l1 : public sc_module
 	sc_out<bool> 		lk1_disable_drivers_phy1;
 	///To disable the receivers to save power
 	sc_out<bool> 		lk1_disable_receivers_phy1;
+
+	///Frequency requested to clocking logic for side 1
+	sc_out<sc_bv<4> > link_frequency1_phy;
 
 	/////////////////////////////////////////////////////
 	// Interface to UserInterface memory - synchronous
@@ -406,7 +413,8 @@ class vc_ht_tunnel_l1 : public sc_module
 	//Shared
 	csr_l2 *the_csr_l2;
 	userinterface_l2 *the_userinterface_l2;
-	
+	misc_logic_l2 *the_misc_logic_l2;
+
 	// *********************************
 	//  Flow control - UserInterface
 	// **********************************
@@ -600,12 +608,15 @@ class vc_ht_tunnel_l1 : public sc_module
 	sc_signal<bool>	csr_drop_uninit_link;
 	sc_signal<bool>			csr_sync;
 
+
 	//Side 0
 #ifdef RETRY_MODE_ENABLED
 	sc_signal <bool> csr_retry0;
 #endif
 	sc_signal< bool > csr_end_of_chain0;
 	sc_signal<bool>	csr_initcomplete0;
+	///Frequency set in the CSR for side 0
+	sc_signal<sc_bv<4> > csr_link_frequency0;
 
 	//Side 1
 #ifdef RETRY_MODE_ENABLED
@@ -615,6 +626,8 @@ class vc_ht_tunnel_l1 : public sc_module
 	sc_signal<bool>	csr_initcomplete1;
 
 	sc_signal<bool> csr_bus_master_enable;
+	///Frequency set in the CSR for side 1
+	sc_signal<sc_bv<4> > csr_link_frequency1;
 
 	//**********************************
 	// Flow control - Misc signals
@@ -870,17 +883,15 @@ class vc_ht_tunnel_l1 : public sc_module
 #endif
 	sc_signal<bool>			lk1_protocol_error_csr;
 
+	//**********************************
+	// Misc logic signals
+	//**********************************
 
-	//*****************************************
-	//*****************************************
-	// END OF COMMUNICATION SIGNAL DECLARATIONS
-	//*****************************************
-	//*****************************************
+	///When the link is completely disconnected for LDTSTOP (side 0)
+	sc_signal<bool> lk0_ldtstop_disconnected;
+	///When the link is completely disconnected for LDTSTOP (side 0)
+	sc_signal<bool> lk1_ldtstop_disconnected;
 
-	///First of two registers to store ldtstopx
-	sc_signal<bool> registered1_ldtstopx;
-	///Second of two registers to store ldtstopx
-	sc_signal<bool> registered_ldtstopx;
 
 #ifdef ENABLE_REORDERING
 	/// Calculated clumping configuration
@@ -889,34 +900,24 @@ class vc_ht_tunnel_l1 : public sc_module
 	/// Calculated clumping configuration
 	sc_signal<sc_bv<5> > clumped_unit_id[4];
 #endif
-	/// SystemC declaration that this module has processes
-	SC_HAS_PROCESS(vc_ht_tunnel_l1);
 
-	/// Some flip-flops for various signals like ldtstopx
-	void register_signals();
+	///Second of two registers to store ldtstopx
+	sc_signal<bool> registered_ldtstopx;
 
-	/// Calculation of clumped unit IDs
-	/**
-		UnitID represents devices in the chain.  But each unitID can only initiate
-		32 non-posted transactions on the chain at one time.  To circumvent this
-		limitation, devices can requests multiples UnitIDs.  Usually, traffic from
-		different Unit ID's have no ordering rules between them, which can cause
-		problem for a device that has mutltiple unitID's.  To solve this problem,
-		unitID's can be "clumped" together to represent the same device so that
-		ordering rules are respected for "clumped" unit ID's.
 
-		The CSR contains the clumping configuration and this process converts it
-		into 32 5-bit vectors which represent the "clumped" unitID represented
-		by the 32 non-clumped unitIDs.  This can then be used by both side of
-		the tunnel to enforce ordering rules.
-	*/
-	void find_clumped_ids();
+	//*****************************************
+	//*****************************************
+	// END OF COMMUNICATION SIGNAL DECLARATIONS
+	//*****************************************
+	//*****************************************
 
-	//*******************************************
-	//Missing signals
-	//*******************************************
+
 	///Constructor of the module
 	vc_ht_tunnel_l1(sc_module_name name);
+
+#ifdef SYSTEMC_SIM
+	~vc_ht_tunnel_l1();
+#endif
 
 };
 	

@@ -907,9 +907,10 @@ void csr_l2::build_device_header_output(){
 	Status register
 	*******************************/
 
-	//Hardwire to zero - unused bits;
+	//status_lsb : Hardwire- unused bits;
 	//Bit 3 is InterruptStatus, also unused
-	config_registers[6] = 0;
+	//Bit 4 is Capabilities List, hardwire to 1
+	config_registers[6] = 0x08;
 	config_registers[7] = status_msb;
 	config_registers[8] = Header_RevisionID;
 	config_registers[9] = (sc_uint<8>)Header_ClassCode.range(7,0);
@@ -1015,7 +1016,7 @@ void csr_l2::manage_device_header_registers_warm_reset(){
 	}
 
 	//Interrupt line - scratchpad
-	interrupt_scratchpad = 0;
+	interrupt_scratchpad = Header_InterruptLine;
 }
 
 void csr_l2::manage_device_header_registers_warm(){
@@ -1184,9 +1185,13 @@ void csr_l2::build_interface_output(){
 	Link configuration register 0
 	******************************/
 
-	//We have a max link width of 8 for in and out: 000
-	// We do not support doubleword flow control
-	config_registers[Interface_Pointer + 6] = 0;
+	sc_uint<8> link_config_0_lsb;
+	link_config_0_lsb.range(2,0) = Interface_MaxLinkWidthIn0;
+	link_config_0_lsb[3] = Interface_DoubleWordFlowControlIn0;
+	link_config_0_lsb.range(6,4) = Interface_MaxLinkWidthOut0;
+	link_config_0_lsb[3] = Interface_DoubleWordFlowControlOut0;
+
+	config_registers[Interface_Pointer + 6] = link_config_0_lsb;
 	config_registers[Interface_Pointer + 7] = link_config_0_msb;
 
 	//Link control 1
@@ -1198,26 +1203,28 @@ void csr_l2::build_interface_output(){
 	config_registers[Interface_Pointer + 9] = link_control0_msb_merged;
 
 	/******************************
-	Link configuration register 9
+	Link configuration register 1
 	******************************/
 
-	//We have a max link width of 8 for in and out: 000
-	// We do not support doubleword flow control
-	config_registers[Interface_Pointer + 10] = 0;
+	sc_uint<8> link_config_1_lsb;
+	link_config_0_lsb.range(2,0) = Interface_MaxLinkWidthIn1;
+	link_config_0_lsb[3] = Interface_DoubleWordFlowControlIn1;
+	link_config_0_lsb.range(6,4) = Interface_MaxLinkWidthOut1;
+	link_config_0_lsb[3] = Interface_DoubleWordFlowControlOut1;
+
+	config_registers[Interface_Pointer + 10] = link_config_1_lsb;
 	config_registers[Interface_Pointer + 11] = link_config_1_msb;
 
 	/***************************
 	Other registers
 	****************************/
 	
-	//Revision ID - 0x40 for version 2.0 of HyperTransport
-	config_registers[Interface_Pointer + 12] = 0x40;
+	config_registers[Interface_Pointer + 12] = Interface_RevisionID;
 
 	config_registers[Interface_Pointer + 13] = link_freq_and_error0;
 
-	//Supported link frequencies - one hot encoding, we only support 200Mhz which is the first bit
-	config_registers[Interface_Pointer + 14] = 1;
-	config_registers[Interface_Pointer + 15] = 0;
+	config_registers[Interface_Pointer + 14] = (sc_uint<8>)Interface_LinkFrequencyCapability0.range(7,0);
+	config_registers[Interface_Pointer + 15] = (sc_uint<8>)Interface_LinkFrequencyCapability0.range(15,8);
 
 	//Feature - We support LDTSOP (bit 1) 
 	sc_bv<8> feature_tmp = 1;
@@ -1226,9 +1233,8 @@ void csr_l2::build_interface_output(){
 
 	config_registers[Interface_Pointer + 17] = link_freq_and_error1;
 
-	//Supported link frequencies - one hot encoding, we only support 200Mhz which is the first bit
-	config_registers[Interface_Pointer + 18] = 1;
-	config_registers[Interface_Pointer + 19] = 0;
+	config_registers[Interface_Pointer + 18] = (sc_uint<8>)Interface_LinkFrequencyCapability1.range(7,0);
+	config_registers[Interface_Pointer + 19] = (sc_uint<8>)Interface_LinkFrequencyCapability1.range(15,8);
 
 	//Enumeration scratchpad
 	config_registers[Interface_Pointer + 20] = enum_scratchpad_lsb;
@@ -1640,9 +1646,9 @@ void csr_l2::manage_interface_registers_cold(){
 		link1WidthOut = write_data.read().range(30,28);
 	}
 
-	//******************
-	// Link Error 0
-	//******************
+	//***************************
+	// Link Frequency and Error 0
+	//***************************
 
 	bool write_link_error0 = write.read() && write_addr.read() == Interface_Pointer/4 + 3 && 
 		sc_bit(write_mask.read()[1]);
@@ -1675,13 +1681,13 @@ void csr_l2::manage_interface_registers_cold(){
 	if(write_link_error0) 
 		link_freq_and_error0_tmp[7] = sc_bit(write_data.read()[15]);
 
-	//Link freq - only 200 supported so hardwire it
-	link_freq_and_error0_tmp.range(3,0) = 0;
+	if(write_link_error0) 
+		link_freq_and_error0_tmp.range(3,0) = write_data.read().range(11,8);
 	link_freq_and_error0 = link_freq_and_error0_tmp;
 
-	//******************
-	// Link Error 1
-	//******************
+	//***************************
+	// Link Frequency and Error 1
+	//***************************
 
 	bool write_link_error1 = write.read() && write_addr.read() == Interface_Pointer/4 + 4 && 
 		sc_bit(write_mask.read()[1]);
@@ -1714,8 +1720,9 @@ void csr_l2::manage_interface_registers_cold(){
 	if(write_link_error1) 
 		link_freq_and_error1_tmp[7] = sc_bit(write_data.read()[15]);
 
-	//Link freq - only 200 supported so hardwire it
-	link_freq_and_error1_tmp.range(3,0) = 0;
+	if(write_link_error1) 
+		link_freq_and_error1_tmp.range(3,0) = write_data.read().range(11,8);
+
 	link_freq_and_error1 = link_freq_and_error1_tmp;
 
 	//Enumeration scratchpad in cold reset process
@@ -2303,7 +2310,7 @@ void csr_l2::output_register_values(){
 	/** Signal from register Interface->LinkConfiguration_1->DoublewordFlowControlOutEnable_1 */
 	//sc_out<bool> DoublewordFlowControlOutEnable_1;
 	/** Signal from register Interface->LinkFrequency_0 */
-	//LinkFrequency_0 = config_registers[Interface_Pointer + 13].read().range(3,0);
+	csr_link_frequency0 = config_registers[Interface_Pointer + 13].read().range(3,0);
 	/** Signal from register Interface->LinkError_0->csr_extended_ctl_timeout_lk0 */
 	csr_extended_ctl_timeout_lk0 = sc_bit(config_registers[Interface_Pointer + 13].read()[7]);
 #ifdef ENABLE_REORDERING
@@ -2311,7 +2318,7 @@ void csr_l2::output_register_values(){
 	csr_unitid_reorder_disable = sc_bit(config_registers[Interface_Pointer + 16].read()[5]);
 #endif
 	/** Signal from register Interface->LinkFrequency_1 */
-	//LinkFrequency_1  = config_registers[Interface_Pointer + 17].read().range(3,0);
+	csr_link_frequency1  = config_registers[Interface_Pointer + 17].read().range(3,0);
 	/** Signal from register Interface->LinkError_1->csr_extended_ctl_timeout_lk1 */
 	csr_extended_ctl_timeout_lk1 = sc_bit(config_registers[Interface_Pointer + 13].read()[7]);
 	/** Signal from register Interface->ErrorHandling->ProtocolErrorFloodEnable */
