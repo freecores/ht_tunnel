@@ -41,6 +41,18 @@
 ///Includes all definitions to control optional features of the design
 /** 
 	@file constants.h
+	@description This file holds configurable options of the tunnel.  Options
+		include wether or not to have the retry mode.  Other options
+		are about some fields in the CSR like the address space required
+		by the application, frequency of the design supported and
+		other identification numbers.  
+		
+		Some configuration are also about the interface with the user.
+		Depending on the latency of the interface, additionnal buffers
+		to buffer packets from the user might have to be used.
+
+		The second part of file also describes constants for the design
+		that are NOT configurable.
 	@author Ami Castonguay
 */
 
@@ -48,6 +60,12 @@
 
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
+
+//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// Constants that CAN and SHOULD be configured!
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
 ///Comment this line to disable the retry mode
 #define RETRY_MODE_ENABLED
@@ -229,30 +247,18 @@
 #endif
 	
 
-// Display enabling for real-time debug
-const bool ModDispEn = false;             // true = Display messages for value changes in registers
-const bool RegDispEn = false;             // true = Display messages from registers
-const bool HLRegDispEn = false;           // true = Display messages from high level registers
-const bool BlockDispEn = false;           // true = Display messages from capability blocs
-const bool CSRRegsDispEn = false;         // true = Display messages from CSR Regs module
-const bool CSRDispEn = false;             // true = Display messages from CSR
-
 
 // Interface constant registers values
-
-// Status register
-const bool InterruptStatusVal = false;    // Value in Device Header -> Status -> Interrupt register
 
 // Header constant registers values
 const sc_uint<16> Header_VendorID = 0xF0F0;
 const sc_uint<16> Header_DeviceID = 0xF0F0;
 const sc_uint<24> Header_ClassCode = 0x000000;
 const sc_uint<8> Header_HeaderType = 0x00;
-const sc_uint<8> Header_BIST = 0x00;
+
 const sc_uint<16> Header_SubsystemVendorID = 0x0000;
 const sc_uint<16> Header_SubsystemID = 0x0000;
-const sc_uint<32> Header_ExpansionROMBaseAddress = 0x00000000;
-const sc_uint<8> Header_InterruptLine = 0x00;                 // Reset value of InterruptLine register
+const sc_uint<8> Header_InterruptLine = 0x00;// Reset value of InterruptLine register
 
 const sc_uint<8> Header_RevisionID = 0x40;
 
@@ -401,37 +407,21 @@ const int Header_BarLowerPos4 = 10;
 const int Header_BarLowerPos5 = 10;
 //@}
 
-// Interface constant registers values
 
-// Command register
-const int Interface_UnitCount = 0x01;    // Number of Unit IDs (minimum = 0x01; Maximum = 0x1F)
+//Link configuration register
+//To change link width, just change it here and everything will be configured properly
+#define CAD_IN_WIDTH 8
+#define CAD_OUT_WIDTH 8
 
-// Link configuration register
-const int Interface_MaxLinkWidthIn0 = 0x0;              // Maximum width of input line
-const bool Interface_DoubleWordFlowControlIn0 = false;  // 1 = Receiver capable of doubleword based data buffer flow control
-const int Interface_MaxLinkWidthOut0 = 0x0;             // Maximum width of output line
-const bool Interface_DoubleWordFlowControlOut0 = false; // 1 = Emitter capable of doubleword based data buffer flow control
-const int Interface_MaxLinkWidthIn1 = 0x0;              // Maximum width of input line
-const bool Interface_DoubleWordFlowControlIn1 = false;  // 1 = Receiver capable of doubleword based data buffer flow control
-const int Interface_MaxLinkWidthOut1 = 0x0;             // Maximum width of output line
-const bool Interface_DoubleWordFlowControlOut1 = false; // 1 = Emitter capable of doubleword based data buffer flow control
-
-
-// Feature capability register
-const bool Interface_IsochronusFlowControl = false;    // true = supports isochronus flow control
-const bool Interface_LDTSTOP = true;                  // true = supports LDTSTOP protocol
-const bool Interface_CRCTestMode = true;              // true = supports CRC test mode
-const bool Interface_ExtendedCTLTimeRequired = false;  // true = CTL asserted 50us during initialization
-const bool Interface_64BitAddressing = false;          // true = supports 64 bits addressing
 
 // Interface constant registers values
-const int Interface_RevisionID = 0x00;
-const int Interface_LinkFrequencyCapability0 = 0x0001;      // Mask of supported frequencies link0
-const int Interface_LinkFrequencyCapability1 = 0x0001;      // Mask of supported frequencies link1
+//Revision ID is 0x40 version 2.0 of HyperTransport
+const int Interface_RevisionID = 0x40;
 
-
-// Error retry constant registers values
-//const int Retry_CapabilitiesPointer = 0xA0;        // Pointer to next capabilities bloc
+//Max support frequency of the design, check spec section 7.5.7 for possible
+//values and 7.5.9 for how to fill out the mask below
+const sc_uint<16> Interface_LinkFrequencyCapability0 = 0x0001;      // Mask of supported frequencies link0
+const sc_uint<16> Interface_LinkFrequencyCapability1 = 0x0001;      // Mask of supported frequencies link1
 
 
 // Direct route constant registers values
@@ -441,11 +431,47 @@ const int DirectRoute_NumberDirectRouteSpaces = 2;      // Number of address ran
 // Revision ID constant registers values
 const int RevisionID_RevisionID = 0x2A;                 // HyperTransport revision
 
+//This is the maximum number of buffers that we can track in another link
+//If the connected has more than 2^(the number), the we ignore the extra
+//number of buffers
+#define FAREND_BUFFER_COUNT_SIZE 7
+#define FAREND_BUFFER_COUNT_MAX_VALUE 127
 
-// Clumping ID constant registers values
-const int UnitIDClumping_ClumpingSupport = 0x00000000;
+#define HISTORY_NUMBER_OF_ENTRIES 32
+#define LOG2_HISTORY_NUMBER_OF_ENTRIES 5
+#define HISTORY_MEMORY_SIZE 128
+#define LOG2_HISTORY_MEMORY_SIZE 7
 
 
+///Number of cycles in 1 us
+#define NUMBER_CYCLES_1_US 200
+///Number of cycles in 50 us
+#define NUMBER_CYCLES_50_US 10000
+///Number of bits to count up to NUMBER_CYCLES_1_US, but minimu of 9
+#define NUMBER_BITS_REPRESENT_1US_MIN9 9
+///This is the number of bits to count up to NUMBER_CYCLES_1_US minus one
+/**The following is for less than 1us for the receiver ignore count because
+the receiver must ignore the input less time than the full 1 us of link init
+or it will miss the beginning of the init sequence*/
+#define NUMBER_BITS_REPRESENT_1US_M1 7
+///Number of bits to count to 2us
+#define NUMBER_BITS_REPRESENT_2US 9
+///The number of cycles inside a ms
+#define NUMBER_CYCLES_1_MS 200000
+///The number of cycles inside a s
+#define NUMBER_CYCLES_1_S 200000000
+///The number of bits neede to count up to NUMBER_CYCLES_1_S
+#define NUMBER_BITS_REPRESENT_1S 28
+
+
+//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// Constants that can't be configured, simply internal
+// constants of the design
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+//Adjust CSR size in function of what features are activates
 #ifdef RETRY_MODE_ENABLED
 	#ifdef ENABLE_DIRECTROUTE
 		#define CSR_SIZE 132
@@ -506,19 +532,45 @@ const sc_uint<8> RevisionID_NextPointer = UnitIDClumping_Pointer;
 	const sc_uint<8> ErrorRetry_NextPointer = 0x00;
 #endif
 
-//This is the maximum number of buffers that we can track in another link
-//If the connected has more than 2^(the number), the we ignore the extra
-//number of buffers
-#define FAREND_BUFFER_COUNT_SIZE 7
-#define FAREND_BUFFER_COUNT_MAX_VALUE 127
+//////////////////////////////////////
+// Interface constant registers values
+//////////////////////////////////////
 
-#define HISTORY_NUMBER_OF_ENTRIES 32
-#define LOG2_HISTORY_NUMBER_OF_ENTRIES 5
-#define HISTORY_MEMORY_SIZE 128
-#define LOG2_HISTORY_MEMORY_SIZE 7
+/** We do NOT support double word flow control so don't modify this unless you modify
+    significant part of the decoder and also modify the CSR to properly handle
+	configuring this mode*/
+const bool Interface_DoubleWordFlowControlIn0 = false;  // 1 = Receiver capable of doubleword based data buffer flow control
+const bool Interface_DoubleWordFlowControlIn1 = false;  // 1 = Receiver capable of doubleword based data buffer flow control
+const bool Interface_DoubleWordFlowControlOut0 = false; // 1 = Emitter capable of doubleword based data buffer flow control
+const bool Interface_DoubleWordFlowControlOut1 = false; // 1 = Emitter capable of doubleword based data buffer flow control
 
+//No need to change anything here, just adjust CAD_IN_WIDTH
+#if CAD_IN_WIDTH==8
+const int Interface_MaxLinkWidthIn0 = 0x0;              // Maximum width of input line
+const int Interface_MaxLinkWidthIn1 = 0x0;              // Maximum width of input line
+#elif CAD_IN_WIDTH==4
+const int Interface_MaxLinkWidthIn0 = 0x5;              // Maximum width of input line
+const int Interface_MaxLinkWidthIn1 = 0x5;              // Maximum width of input line
+#elif CAD_IN_WIDTH==2
+const int Interface_MaxLinkWidthIn0 = 0x4;              // Maximum width of input line
+const int Interface_MaxLinkWidthIn1 = 0x4;              // Maximum width of input line
+#else
+#error Invalid CAD_IN_WIDTH value
+#endif
 
-#define CAD_IN_WIDTH 8
+//No need to change anything here, just adjust CAD_OUT_WIDTH
+#if CAD_OUT_WIDTH==8
+const int Interface_MaxLinkWidthOut0 = 0x0;              // Maximum width of input line
+const int Interface_MaxLinkWidthOut1 = 0x0;              // Maximum width of input line
+#elif CAD_OUT_WIDTH==4
+const int Interface_MaxLinkWidthOut0 = 0x5;              // Maximum width of input line
+const int Interface_MaxLinkWidthOut1 = 0x5;              // Maximum width of input line
+#elif CAD_OUT_WIDTH==2
+const int Interface_MaxLinkWidthOut0 = 0x4;              // Maximum width of input line
+const int Interface_MaxLinkWidthOut1 = 0x4;              // Maximum width of input line
+#else
+#error Invalid CAD_IN_WIDTH value
+#endif
 
 
 #if CAD_IN_WIDTH == 8
@@ -534,8 +586,6 @@ const sc_uint<8> RevisionID_NextPointer = UnitIDClumping_Pointer;
 	#error INVALID_CA_OUT_WIDTH
 #endif
 
-#define CAD_OUT_WIDTH 8
-
 #if CAD_OUT_WIDTH == 8
 	#define CAD_OUT_DEPTH 4
 #elif CAD_OUT_WIDTH == 4
@@ -546,14 +596,13 @@ const sc_uint<8> RevisionID_NextPointer = UnitIDClumping_Pointer;
 	#error INVALID_lk_cad_phy_WIDTH
 #endif
 
-#define CSR_OUTPUT_FILE_NAME "csroutput.txt"
-
-	//0 - response data
-	//1 - response command
-	//2 - non-posted data
-	//3 - non-posted command
-	//4 - posted data
-	//5 - posted command
+//Meaning of bits in vector that identify buffer status
+//0 - response data
+//1 - response command
+//2 - non-posted data
+//3 - non-posted command
+//4 - posted data
+//5 - posted command
 #define BUF_STATUS_R_DATA 0
 #define BUF_STATUS_R_CMD 1
 #define BUF_STATUS_NP_DATA 2
@@ -561,6 +610,7 @@ const sc_uint<8> RevisionID_NextPointer = UnitIDClumping_Pointer;
 #define BUF_STATUS_P_DATA 4
 #define BUF_STATUS_P_CMD 5
 
+//Values that can be sent to flow control multiplexer to select output
 #define FC_MUX_NOP 0
 #define FC_MUX_FWD_LSB 1
 #define FC_MUX_FWD_MSB 2
