@@ -358,12 +358,12 @@ bool write_getDataError(const sc_bv<64> &pkt) {
 
 ResponseError response_getResponseError(const sc_bv<64> &pkt) {
 	ResponseError error;
-	if(pkt[20] == false){
-		if(pkt[28] == false) error = RE_NORMAL;
+	if(pkt[21] == false){
+		if(pkt[29] == false) error = RE_NORMAL;
 		error = RE_DATA_ERROR;
 	}
 	else{
-		if(pkt[28] == false) error = RE_TARGET_ABORT;
+		if(pkt[29] == false) error = RE_TARGET_ABORT;
 		error = RE_MASTER_ABORT;
 	}
 	return error;
@@ -391,18 +391,18 @@ sc_bv<32> generateReadResponse(const sc_bv<5> &unitID,
 	packet.range(20,16) = srcTag;
 	packet.range(31,30) = rqUID;
 
-	//Error 0 => bv[20]
-	//Error 1 => bv[28]
+	//Error 0 => bv[21]
+	//Error 1 => bv[29]
 
 	if(error == RE_NORMAL || error == RE_DATA_ERROR)
-		packet[20] = false;
+		packet[21] = false;
 	else
-		packet[20] = true;
+		packet[21] = true;
 
 	if(error == RE_NORMAL || error == RE_TARGET_ABORT)
-		packet[28] = false;
+		packet[29] = false;
 	else
-		packet[28] = true;
+		packet[29] = true;
 
 	packet[14] = bridge;
 	packet[15] = passPW;
@@ -425,18 +425,18 @@ sc_bv<32> generateTargetDone(const sc_bv<5> &unitID,
 	packet.range(20,16) = srcTag;
 	packet.range(31,30) = rqUID;
 
-	//Error 0 => bv[20]
-	//Error 1 => bv[28]
+	//Error 0 => bv[21]
+	//Error 1 => bv[29]
 
 	if(error == RE_NORMAL || error == RE_DATA_ERROR)
-		packet[20] = false;
+		packet[21] = false;
 	else
-		packet[20] = true;
+		packet[21] = true;
 
 	if(error == RE_NORMAL || error == RE_TARGET_ABORT)
-		packet[28] = false;
+		packet[29] = false;
 	else
-		packet[28] = true;
+		packet[29] = true;
 
 	packet[14] = bridge;
 	packet[15] = passPW;

@@ -53,18 +53,18 @@ ResponsePacket::ResponsePacket(const sc_bv<6> &command,
 	bv.range(20,16) = srcTag;
 	bv.range(31,30) = rqUID;
 
-	//Error 0 => bv[20]
-	//Error 1 => bv[28]
+	//Error 0 => bv[21]
+	//Error 1 => bv[29]
 
 	if(error == RE_NORMAL || error == RE_DATA_ERROR)
-		bv[20] = false;
+		bv[21] = false;
 	else
-		bv[20] = true;
+		bv[21] = true;
 
 	if(error == RE_NORMAL || error == RE_TARGET_ABORT)
-		bv[28] = false;
+		bv[29] = false;
 	else
-		bv[28] = true;
+		bv[29] = true;
 
 	bv[14] = bridge;
 	bv[15] = passPW;
@@ -83,12 +83,12 @@ sc_uint<4> ResponsePacket::getDataLengthm1() const {
 }
 
 ResponseError ResponsePacket::getResponseError() const{
-	if(bv[20] == false){
-		if(bv[28] == false) return RE_NORMAL;
+	if(bv[21] == false){
+		if(bv[29] == false) return RE_NORMAL;
 		return RE_DATA_ERROR;
 	}
 	else{
-		if(bv[28] == false) return RE_TARGET_ABORT;
+		if(bv[29] == false) return RE_TARGET_ABORT;
 		return RE_MASTER_ABORT;
 	}
 }
