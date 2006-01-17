@@ -132,6 +132,7 @@ public:
 	///Flag indicating the last data dword has been received
 	//sc_signal< bool >		count_done;
 
+#ifdef RETRY_MODE_ENABLED
 	//----------------------------------------
 	//   buffers / MUX
 	//----------------------------------------
@@ -141,6 +142,7 @@ public:
 	sc_signal< syn_ControlPacketComplete >	ctlPacket1;
 	///To select wich buffer is being outputed between ctlPacket0 and ctlPacket1
 	sc_signal< bool >		selCtlPckt;
+#endif
 
 	//----------------------------------------
 	//   state machine / NOP handler
@@ -183,8 +185,10 @@ public:
 	///Command of the packet received from the input fifo
 	sc_signal< PacketCommand >	cmd;
 
+#ifdef RETRY_MODE_ENABLED
 	///error signal for extended 64 address
 	sc_signal< bool >			error64Bits;
+#endif
 	///error signal for extended 64 address for packet that has data associated
 	sc_signal< bool >			error64BitsCtlwData;
 
@@ -197,12 +201,12 @@ public:
 
 	cd_state_machine_l3		*SM;///<The controler of the decoder
 	cd_counter_l3			*CNT;///<A simple counter
-	cd_cmd_buffer_l3		*CMD_BUF;///<A command buffer
 	cd_cmdwdata_buffer_l3	*CMDWDATA_BUF;///<A command buffer for packets that contain data
-	cd_mux_l3				*MUX;///<A simple multiplexer
 	cd_nop_handler_l3		*NOP_HANDLER;///<Module that handles received nop packets
 
 #ifdef RETRY_MODE_ENABLED
+	cd_cmd_buffer_l3		*CMD_BUF;///<A command buffer
+	cd_mux_l3				*MUX;///<A simple multiplexer
 	cd_history_rx_l3		*HISTORY;///<Counts the number of received packets for history (retry mode) purpose
 	cd_packet_crc_l3		*packet_crc_unit;///<Calcultates and checks per-packet CRC
 #endif

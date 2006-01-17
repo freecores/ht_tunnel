@@ -58,18 +58,18 @@ cd_state_machine_l3::cd_state_machine_l3(sc_module_name name) : sc_module(name)
 	sensitive 
 #ifdef RETRY_MODE_ENABLED
 		<< crc1_good << crc2_good << crc1_stomped << crc2_stomped << csr_retry 
-		<< sync_count
+		<< sync_count << selCtlPckt
 #endif
 		<< lk_lctl_cd  << lk_hctl_cd  << currentState << dWordIn
-		<< end_of_count << selCtlPckt << lk_available_cd;
+		<< end_of_count<< lk_available_cd;
 
 	SC_METHOD(output_packet_selection);
 	sensitive << 
 #ifdef RETRY_MODE_ENABLED
-				csr_retry <<
+				csr_retry << 
 #endif
-				lk_lctl_cd << lk_available_cd <<
-				controlEnable << controlDataEnable;
+				controlEnable << lk_lctl_cd << lk_available_cd <<
+				controlDataEnable;
 
 }
 
@@ -442,9 +442,9 @@ void cd_state_machine_l3::setstate()
 	if(!resetx.read())
 	{
 		currentState = CONTROL_st;
-		controlEnable = false;
 		controlDataEnable = false;
 		cd_data_pending_ro = false;
+		controlEnable = false;
 
 #ifdef RETRY_MODE_ENABLED
 		cd_initiate_retry_disconnect = false;
@@ -478,18 +478,27 @@ void cd_state_machine_l3::setstate()
 		//If no new packet, stay with the same value or force 0 if it is sent out
 		else{
 			controlEnable = controlEnable.read() && 
-				!(!selCtlPckt.read() && cd_available_ro.read());
+				!(
+#ifdef RETRY_MODE_ENABLED
+				!selCtlPckt.read() &&
+#endif
+				cd_available_ro.read());
 		}
 
 		//If a new packet was put in the control packet with data output register,
 		//remember it
-		if(next_controlEnable.read() && nextSelCtlPckt.read()){
+		if(next_controlEnable.read()
+			&& nextSelCtlPckt.read()
+			){
 			controlDataEnable = true;
 		}
 		//If no new packet, stay with the same value or force 0 if it is sent out
 		else{
-			controlDataEnable = controlDataEnable.read() && 
-				!(selCtlPckt.read() && cd_available_ro.read());
+			controlDataEnable = controlDataEnable.read() && !(
+#ifdef RETRY_MODE_ENABLED
+				selCtlPckt.read() && 
+#endif
+				cd_available_ro.read());
 		}
 
 #ifdef RETRY_MODE_ENABLED
@@ -525,10 +534,12 @@ void cd_state_machine_l3::stateoutputs()
 	crc2_reset = false;
 #endif
 
+#ifdef RETRY_MODE_ENABLED
 	//For the non-data command buffer
 	enCtl1 = false;
 	enCtl2 = false;
 	error64Bits = false;
+#endif
 
 	//For the data command buffer
 	enCtlwData1 = false;
@@ -547,7 +558,6 @@ void cd_state_machine_l3::stateoutputs()
 
 	//For the command buffer
 	next_controlEnable = false;
-
 	//For the mux selection
 	nextSelCtlPckt = false;
 
@@ -587,8 +597,13 @@ void cd_state_machine_l3::stateoutputs()
 				enCtlwData1 = true;
 			}
 			else /* if(cmdIn == READ || cmdIn == BROADCAST) commented to simplify logic */{
+#ifdef RETRY_MODE_ENABLED
 				enCtl1 = true;
 				error64Bits = true;
+#else
+				enCtlwData1 = true;
+				error64BitsCtlwData = true;
+#endif
 			}
 		}
 		break;
@@ -615,15 +630,18 @@ void cd_state_machine_l3::stateoutputs()
 			if(cmdIn == FLUSH || cmdIn == FENCE || cmdIn == TGTDONE ||
 				cmdIn == READ || cmdIn == BROADCAST)
 			{
+#ifdef RETRY_MODE_ENABLED
 				enCtl1 = true;
+#else
+				enCtlwData1 = true;
+#endif
 			}
 			
 			if((cmdIn == FLUSH || cmdIn == FENCE || cmdIn == TGTDONE) 
 #ifdef RETRY_MODE_ENABLED
 				&& !csr_retry.read()
 #endif
-				)
-			{
+			){
 				nextSelCtlPckt = false;
 				next_controlEnable = true;
 			}
@@ -631,11 +649,11 @@ void cd_state_machine_l3::stateoutputs()
 #ifdef RETRY_MODE_ENABLED
 				&& !csr_retry.read()
 #endif
-				)
-			{
+			){
 				nextSelCtlPckt = true;
 				next_controlEnable = true;
 			}
+
 			
 			/* If the input command is a NOP, set the NOP count*/
 			if(cmdIn == NOP){
@@ -658,15 +676,19 @@ void cd_state_machine_l3::stateoutputs()
 	
 	case ADD_st:
 		if(lk_available_cd.read()){
-			enCtl2 = true;
 #ifdef RETRY_MODE_ENABLED
+			enCtl2 = true;
 			if(csr_retry.read())
 				crc1_enable = true;
 			else
-#endif
 			{	nextSelCtlPckt = false;
 				next_controlEnable = true;
 			}
+#else
+			nextSelCtlPckt = false;
+			enCtlwData2 = true;
+			next_controlEnable = true;
+#endif
 			
 		}
 		break; 
@@ -683,7 +705,6 @@ void cd_state_machine_l3::stateoutputs()
 				nextSelCtlPckt = true;
 				next_controlEnable = true;
 			}
-			
 		}
 		break;
 			
@@ -702,11 +723,14 @@ void cd_state_machine_l3::stateoutputs()
 		cd_data_pending_ro_buf	= true;
 		
 		if(lk_available_cd.read()){
+#ifdef RETRY_MODE_ENABLED
 			enCtl1 = true;
 			error64Bits = true;
-#ifdef RETRY_MODE_ENABLED
 			if(csr_retry.read())
 				crc2_enable = true;
+#else
+			enCtlwData1 = true;
+			error64BitsCtlwData = true;
 #endif
 		}
 		break;
@@ -734,7 +758,11 @@ void cd_state_machine_l3::stateoutputs()
 				if(cmdIn == FLUSH || cmdIn == FENCE || cmdIn == TGTDONE ||
 					cmdIn == READ || cmdIn == BROADCAST)
 				{
+#ifdef RETRY_MODE_ENABLED
 					enCtl1 = true;
+#else
+					enCtlwData1 = true;
+#endif
 				}
 				
 				if(cmdIn == NOP){
@@ -779,16 +807,22 @@ void cd_state_machine_l3::stateoutputs()
 		cd_data_pending_ro_buf	= true;
 
 		if(lk_available_cd.read()){
-			enCtl2 = true;
 #ifdef RETRY_MODE_ENABLED
+			enCtl2 = true;
 			if(csr_retry.read())
 				crc1_enable = true;
 			else
-#endif
 			{
 				nextSelCtlPckt = false;
 				next_controlEnable = true;
 			}
+#else
+			nextSelCtlPckt = false;
+			enCtlwData2 = true;
+			next_controlEnable = true;
+
+#endif
+
 		}
 		break;
 
@@ -963,9 +997,9 @@ void cd_state_machine_l3::stateoutputs()
 
 void cd_state_machine_l3::output_packet_selection(){
 	cd_available_ro = false;
+#ifdef RETRY_MODE_ENABLED
 	selCtlPckt = false;
 
-#ifdef RETRY_MODE_ENABLED
 	if(csr_retry.read()){
 		cd_available_ro = controlEnable.read() || controlDataEnable.read();
 		selCtlPckt = controlDataEnable.read();
@@ -980,7 +1014,9 @@ void cd_state_machine_l3::output_packet_selection(){
 		*/
 		if(controlDataEnable.read()){
 			cd_available_ro = true;
+#ifdef RETRY_MODE_ENABLED
 			selCtlPckt = true;
+#endif
 		}
 		/** For non data packets, we must wait for another packet to arrive
 			before commiting the packet, to prevent corruption if the next
@@ -988,7 +1024,9 @@ void cd_state_machine_l3::output_packet_selection(){
 		*/
 		else if(controlEnable.read() && lk_lctl_cd.read() && lk_available_cd.read()){
 			cd_available_ro = true;
+#ifdef RETRY_MODE_ENABLED
 			selCtlPckt = false;
+#endif
 		}
 	}
 }

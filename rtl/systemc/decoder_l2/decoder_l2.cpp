@@ -82,14 +82,18 @@ decoder_l2::decoder_l2( sc_module_name name) : sc_module(name)
 	SM->cd_write_db(cd_write_db);
 	//SM->decrCnt(decrCnt);
 	SM->cd_available_ro(cd_available_ro);
-	SM->selCtlPckt(selCtlPckt);
 	SM->enCtlwData1(enCtlWdata1);
 	SM->enCtlwData2(enCtlWdata2);
+#ifdef RETRY_MODE_ENABLED
+	SM->selCtlPckt(selCtlPckt);
 	SM->enCtl1(enCtl1);
 	SM->enCtl2(enCtl2);
+#endif
 	SM->setNopCnt(setNopCnt);
 	SM->cd_sync_detected_csr(cd_sync_detected_csr);
-	SM->error64Bits(error64Bits);;
+#ifdef RETRY_MODE_ENABLED
+	SM->error64Bits(error64Bits);
+#endif
 	SM->error64BitsCtlwData(error64BitsCtlwData);
 	SM->send_nop_notification(send_nop_notification);
 	//SM->count_done(count_done);
@@ -123,6 +127,7 @@ decoder_l2::decoder_l2( sc_module_name name) : sc_module(name)
 	CNT->end_of_count(end_of_count);
 	//CNT->count_done(count_done);
 	
+#ifdef RETRY_MODE_ENABLED
 	CMD_BUF = new cd_cmd_buffer_l3("CMD_BUF");
 	
 	CMD_BUF->clk(clk);
@@ -132,7 +137,8 @@ decoder_l2::decoder_l2( sc_module_name name) : sc_module(name)
 	CMD_BUF->packet(ctlPacket0);
 	CMD_BUF->error64Bits(error64Bits);
 	CMD_BUF->resetx(resetx);
-	
+#endif	
+
 	CMDWDATA_BUF = new cd_cmdwdata_buffer_l3("CMDWDATA_BUF");
 	
 	CMDWDATA_BUF->clk(clk);
@@ -140,17 +146,23 @@ decoder_l2::decoder_l2( sc_module_name name) : sc_module(name)
 	CMDWDATA_BUF->db_address_cd(db_address_cd);
 	CMDWDATA_BUF->enCtl1(enCtlWdata1);
 	CMDWDATA_BUF->enCtl2(enCtlWdata2);
+#ifdef RETRY_MODE_ENABLED
 	CMDWDATA_BUF->packet(ctlPacket1);
+#else
+	CMDWDATA_BUF->packet(cd_packet_ro);
+#endif
 	CMDWDATA_BUF->error64BitsCtlwData(error64BitsCtlwData);
 	CMDWDATA_BUF->resetx(resetx);
 	CMDWDATA_BUF->cd_data_pending_addr_ro(cd_data_pending_addr_ro);
 	
+#ifdef RETRY_MODE_ENABLED
 	MUX = new cd_mux_l3("MUX");
 	
 	MUX->ctlPacket0(ctlPacket0);
 	MUX->ctlPacket1(ctlPacket1);
 	MUX->select(selCtlPckt);
 	MUX->cd_packet_ro(cd_packet_ro);
+#endif
 	
 	NOP_HANDLER = new cd_nop_handler_l3("NOP_HANDLER");
 	
@@ -197,11 +209,11 @@ decoder_l2::decoder_l2( sc_module_name name) : sc_module(name)
 decoder_l2::~decoder_l2(){
 	delete SM;
 	delete CNT;
-	delete CMD_BUF;
 	delete CMDWDATA_BUF;
-	delete MUX;
 	delete NOP_HANDLER;
 #ifdef RETRY_MODE_ENABLED
+	delete CMD_BUF;
+	delete MUX;
 	delete HISTORY;
 	delete packet_crc_unit;
 #endif

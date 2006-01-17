@@ -209,20 +209,22 @@ public:
 
 	///Enable control command to be read by control buffer
 	sc_out< bool >	cd_available_ro;
+	///Enable first half of a control word, that will have data if retry mode enabled or any otherwise
+	sc_out< bool >	enCtlwData1;
+	///Enable second half of a control word, that will have data if retry mode enabled or any otherwise
+	sc_out< bool >	enCtlwData2;
+#ifdef RETRY_MODE_ENABLED
 	///Select which control packet will drive the output (the one with data or the one without)
 	sc_out< bool >	selCtlPckt;
-	///Enable first half of a control word that will have data
-	sc_out< bool >	enCtlwData1;
-	///Enable second half of a control word that will have data
-	sc_out< bool >	enCtlwData2;
 	///Enable first half of a control word that will NOT have data
 	sc_out< bool >	enCtl1;
 	///Enable second half of a control word that will NOT have data
 	sc_out< bool >	enCtl2;
-	///Enable the NOP count to be set
-	sc_out< bool >	setNopCnt;
 	///Flag to be activated following reception of an address extension
 	sc_out< bool >	error64Bits;
+#endif
+	///Enable the NOP count to be set
+	sc_out< bool >	setNopCnt;
 	///Flag to be activated following reception of an address extension
 	sc_out< bool >	error64BitsCtlwData;
 
