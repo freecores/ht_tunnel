@@ -63,7 +63,7 @@ public:
 		@param origin The LogicalLayer that launchde the event
 	*/
 	virtual void receivedHtPacketEvent(const ControlPacket * packet,
-		const int * data,LogicalLayer* origin)=0;
+		const int * data,const LogicalLayer* origin)=0;
 	/**
 		Called when a periodic CRC error is detected
 	*/
