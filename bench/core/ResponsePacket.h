@@ -118,6 +118,12 @@ public:
 	*/	
 	virtual bool isChain() const {return false;}
 
+	///Get the SrcTag of the response
+	/**
+		@return SrcTag of the response
+	*/	
+	virtual sc_uint<5> getSrcTag() const {return (sc_bv<5>)bv.range(20,16);}
+
 	///Get the <code>VirtualChannel</code> of the packet
 	/**
 		To get the virtual channel of this packet
