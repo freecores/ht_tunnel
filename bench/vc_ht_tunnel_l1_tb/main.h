@@ -48,16 +48,16 @@
 		ModelSim.  It should not be included in normal compilation.
 */
 
-#include "../../core_synth/synth_datatypes.h"
+#include "../../rtl/systemc/core_synth/synth_datatypes.h"
 
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-#include "../../vc_ht_tunnel_l1/vc_ht_tunnel_l1.h"
-#include "../../flow_control_l2/user_fifo_l3.h"
-#include "../../flow_control_l2/history_buffer_l3.h"
+#include "../../rtl/systemc/vc_ht_tunnel_l1/vc_ht_tunnel_l1.h"
+#include "../../rtl/systemc/flow_control_l2/user_fifo_l3.h"
+#include "../../rtl/systemc/flow_control_l2/history_buffer_l3.h"
 #include "vc_ht_tunnel_l1_tb.h"
 
 using namespace std;
@@ -153,12 +153,12 @@ public:
 	sc_signal<bool> memory_write0;
 	sc_signal<sc_uint<2> > memory_write_address_vc0;
 	sc_signal<sc_uint<BUFFERS_ADDRESS_WIDTH> > memory_write_address_buffer0;
-	sc_signal<sc_uint<DATABUFFER_LOG2_MAX_DATA_PER_BUFFER> > memory_write_address_pos0;//40
+	sc_signal<sc_uint<4> > memory_write_address_pos0;//40
 	sc_signal<sc_bv<32> > memory_write_data0;
 	
 	sc_signal<sc_uint<2> > memory_read_address_vc0[2];
 	sc_signal<sc_uint<BUFFERS_ADDRESS_WIDTH> >memory_read_address_buffer0[2];
-	sc_signal<sc_uint<DATABUFFER_LOG2_MAX_DATA_PER_BUFFER> > memory_read_address_pos0[2];//50
+	sc_signal<sc_uint<4> > memory_read_address_pos0[2];//50
 
 	sc_signal<sc_bv<32> > memory_output0[2];
 	
@@ -169,12 +169,12 @@ public:
 	sc_signal<bool> memory_write1;
 	sc_signal<sc_uint<2> > memory_write_address_vc1;
 	sc_signal<sc_uint<BUFFERS_ADDRESS_WIDTH> > memory_write_address_buffer1;
-	sc_signal<sc_uint<DATABUFFER_LOG2_MAX_DATA_PER_BUFFER> > memory_write_address_pos1;
+	sc_signal<sc_uint<4> > memory_write_address_pos1;
 	sc_signal<sc_bv<32> > memory_write_data1;
 	
 	sc_signal<sc_uint<2> > memory_read_address_vc1[2];
 	sc_signal<sc_uint<BUFFERS_ADDRESS_WIDTH> >memory_read_address_buffer1[2];
-	sc_signal<sc_uint<DATABUFFER_LOG2_MAX_DATA_PER_BUFFER> > memory_read_address_pos1[2];
+	sc_signal<sc_uint<4> > memory_read_address_pos1[2];
 
 	sc_signal<sc_bv<32> > memory_output1[2];
 

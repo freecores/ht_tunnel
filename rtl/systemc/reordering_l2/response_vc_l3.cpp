@@ -360,12 +360,12 @@ void response_vc_l3::update_internal_registers()
 		if(compare_with_higher.read()){
 			lower_passPW[n] = packet_passpw_register[2 * (n + 1)];
 			lower_buffer_free[n] = (sc_bit)buffer_free[2 * (n + 1)];
-			lower_pass_count[n] = pass_count[2 * (n + 1)];
+			lower_pass_count[n] = pass_count[2 * (n + 1)].read();
 		}
 		else{
 			lower_passPW[n] = packet_passpw_register[2 * n];
 			lower_buffer_free[n] = (sc_bit)buffer_free[2 * n];
-			lower_pass_count[n] = pass_count[2 * n];
+			lower_pass_count[n] = pass_count[2 * n].read();
 		}
 	}
 
@@ -423,7 +423,7 @@ void response_vc_l3::update_internal_registers()
 		destination_registers[0] = destination_with_deletion[0];
 		packet_addr_register[0] = packet_addr_register[0];
 		packet_passpw_register[0] = packet_passpw_register[0];
-		pass_count[0] = pass_count[0];
+		pass_count[0] = pass_count[0].read();
 	}
 
 
@@ -446,7 +446,7 @@ void response_vc_l3::update_internal_registers()
 		destination_registers[1] = destination_with_deletion[0];
 		packet_addr_register[1] = packet_addr_register[0];
 		packet_passpw_register[1] = packet_passpw_register[0];
-		original_pass_count1 = pass_count[0];
+		original_pass_count1 = pass_count[0].read();
 		break;
 
 	case 2:
@@ -454,14 +454,14 @@ void response_vc_l3::update_internal_registers()
 		destination_registers[1] = destination_with_deletion[2];
 		packet_addr_register[1] = packet_addr_register[2];
 		packet_passpw_register[1] = packet_passpw_register[2];
-		original_pass_count1 = pass_count[2];
+		original_pass_count1 = pass_count[2].read();
 		break;
 
 	default:
 		destination_registers[1] = destination_with_deletion[1];
 		packet_addr_register[1] = packet_addr_register[1];
 		packet_passpw_register[1] = packet_passpw_register[1];
-		original_pass_count1 = pass_count[1];
+		original_pass_count1 = pass_count[1].read();
 	}
 
 	bool increase_pass_count1;
@@ -492,21 +492,21 @@ void response_vc_l3::update_internal_registers()
 		destination_registers[NB_OF_BUFFERS - 1] = destination_with_deletion[NB_OF_BUFFERS - 2];
 		packet_addr_register[NB_OF_BUFFERS - 1] = packet_addr_register[NB_OF_BUFFERS - 2];
 		packet_passpw_register[NB_OF_BUFFERS - 1] = packet_passpw_register[NB_OF_BUFFERS - 2];
-		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 2];
+		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 2].read();
 		break;
 
 	case 5:
 		destination_registers[NB_OF_BUFFERS - 1] = destination_with_deletion[NB_OF_BUFFERS - 3];
 		packet_addr_register[NB_OF_BUFFERS - 1] = packet_addr_register[NB_OF_BUFFERS - 3];
 		packet_passpw_register[NB_OF_BUFFERS - 1] = packet_passpw_register[NB_OF_BUFFERS - 3];
-		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 3];
+		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 3].read();
 		break;
 
 	default:
 		destination_registers[NB_OF_BUFFERS - 1] = destination_with_deletion[NB_OF_BUFFERS - 1];
 		packet_addr_register[NB_OF_BUFFERS - 1] = packet_addr_register[NB_OF_BUFFERS - 1];
 		packet_passpw_register[NB_OF_BUFFERS - 1] = packet_passpw_register[NB_OF_BUFFERS - 1];
-		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 1];
+		pass_count[NB_OF_BUFFERS - 1] = pass_count[NB_OF_BUFFERS - 1].read();
 	}
 
 	//Generic case
@@ -529,7 +529,7 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 3] = destination_with_deletion[2 * n + 2];
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 2];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 2];
-			original_pass_count_pair = pass_count[2 * n + 2];
+			original_pass_count_pair = pass_count[2 * n + 2].read();
 			break;
 
 		case 8:
@@ -537,7 +537,7 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 3] = destination_with_deletion[2 * n + 4];
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 4];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 4];
-			original_pass_count_pair = pass_count[2 * n + 4];
+			original_pass_count_pair = pass_count[2 * n + 4].read();
 			break;
 
 		case 12:
@@ -545,14 +545,14 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 3] = destination_with_deletion[2 * n + 1];
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 1];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 1];
-			original_pass_count_pair = pass_count[2 * n + 1];
+			original_pass_count_pair = pass_count[2 * n + 1].read();
 			break;
 
 		default:
 			destination_registers[2 * n + 3] = destination_with_deletion[2 * n + 3];
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 3];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 3];
-			original_pass_count_pair = pass_count[2 * n + 3];
+			original_pass_count_pair = pass_count[2 * n + 3].read();
 		}
 
 		bool increment_pair_pass_count;
@@ -590,7 +590,7 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 2] = destination_with_deletion[2 * n + 1];
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 1];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 1];
-			original_pass_count_impair = pass_count[2 * n + 1];
+			original_pass_count_impair = pass_count[2 * n + 1].read();
 			break;
 
 		case 1:
@@ -598,7 +598,7 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 2] = destination_with_deletion[2 * n + 3];
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 3];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 3];
-			original_pass_count_impair = pass_count[2 * n + 3];
+			original_pass_count_impair = pass_count[2 * n + 3].read();
 			break;
 
 		case 6:
@@ -606,14 +606,14 @@ void response_vc_l3::update_internal_registers()
 			destination_registers[2 * n + 2] = destination_with_deletion[2 * n];
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n];
-			original_pass_count_impair = pass_count[2 * n];
+			original_pass_count_impair = pass_count[2 * n].read();
 			break;
 
 		default:
 			destination_registers[2 * n + 2] = destination_with_deletion[2 * n + 2];
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 2];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 2];
-			original_pass_count_impair = pass_count[2 * n + 2];
+			original_pass_count_impair = pass_count[2 * n + 2].read();
 		}
 
 

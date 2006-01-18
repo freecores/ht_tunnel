@@ -63,8 +63,15 @@ void multiplexer_l3::mux( void )
 	else {	//fin du non-reset
 		
 
+#ifdef SYSTEMC_SIM
+		//GCC comlains if it's not an int that is used for the switch
+		//But for synthesis, I don't want to change it to an int because
+		//by default an int has a 32 bit width, which is not what I
+		//want for a MUX selector!
+		switch ((int)fc_ctr_mux.read()) { //synopsys infer_mux
+#else
 		switch (fc_ctr_mux.read()) { //synopsys infer_mux
-			
+#endif		
 		case FC_MUX_FWD_LSB: 		//fowrard CMD is sent (LSB)
 			{
 			sc_bv<64> packet = fwd_packet.read().packet;

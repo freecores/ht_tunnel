@@ -168,10 +168,10 @@ void userinterface_l2::clocked_process() {
 		///////////////////////////////////////
 		sc_uint<USER_MEMORY_ADDRESS_WIDTH_PER_VC> wr_pointer_to_increase;
 		if(tx_increase_wrpointer_side.read()){
-			wr_pointer_to_increase = tx_wr1pointer[tx_increase_wrpointer_vc.read()];
+			wr_pointer_to_increase = tx_wr1pointer[tx_increase_wrpointer_vc.read()].read();
 		}
 		else{
-			wr_pointer_to_increase = tx_wr0pointer[tx_increase_wrpointer_vc.read()];
+			wr_pointer_to_increase = tx_wr0pointer[tx_increase_wrpointer_vc.read()].read();
 		}
 		if((wr_pointer_to_increase == USER_MEMORY_SIZE_PER_VC - 1) && tx_increase_wrpointer.read())
 			wr_pointer_to_increase = 0;
@@ -852,13 +852,13 @@ void userinterface_l2::tx_rd0_process() {
 	sc_uint<USER_MEMORY_ADDRESS_WIDTH_PER_VC> rd0_pointer_from_selected_vc;
 	switch(fc0_data_vc_ui.read()){
 		case VC_POSTED:
-			rd0_pointer_from_selected_vc = tx_rd0pointer[0];
+			rd0_pointer_from_selected_vc = tx_rd0pointer[0].read();
 			break;
 		case VC_NON_POSTED:
-			rd0_pointer_from_selected_vc = tx_rd0pointer[1];
+			rd0_pointer_from_selected_vc = tx_rd0pointer[1].read();
 			break;
 		default:
-			rd0_pointer_from_selected_vc = tx_rd0pointer[2];
+			rd0_pointer_from_selected_vc = tx_rd0pointer[2].read();
 	}
 
 	if(fc0_consume_data_ui.read()){
@@ -915,13 +915,13 @@ void userinterface_l2::tx_rd1_process() {
 	sc_uint<USER_MEMORY_ADDRESS_WIDTH_PER_VC> rd1_pointer_from_selected_vc;
 	switch(fc0_data_vc_ui.read()){
 		case VC_POSTED:
-			rd1_pointer_from_selected_vc = tx_rd1pointer[0];
+			rd1_pointer_from_selected_vc = tx_rd1pointer[0].read();
 			break;
 		case VC_NON_POSTED:
-			rd1_pointer_from_selected_vc = tx_rd1pointer[1];
+			rd1_pointer_from_selected_vc = tx_rd1pointer[1].read();
 			break;
 		default:
-			rd1_pointer_from_selected_vc = tx_rd1pointer[2];
+			rd1_pointer_from_selected_vc = tx_rd1pointer[2].read();
 	}
 
 	if(fc1_consume_data_ui.read()){

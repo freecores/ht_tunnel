@@ -369,17 +369,17 @@ void nposted_vc_l3::update_internal_registers()
 	for(int n = 0; n < NB_OF_BUFFERS/2; n++){
 		if(compare_with_higher.read()){
 			lower_buffer_free[n] = (sc_bit)buffer_free[2 * (n + 1)];
-			lower_clumped_unitid[n] = clumped_unitid_registers[2 * (n + 1)];
-			lower_passPW[n] = packet_passpw_register[2 * (n + 1)];
-			lower_seqID[n] = packet_seqid_register[2 * (n + 1)];
-			lower_pass_count[n] = pass_count[2 * (n + 1)];
+			lower_clumped_unitid[n] = clumped_unitid_registers[2 * (n + 1)].read();
+			lower_passPW[n] = packet_passpw_register[2 * (n + 1)].read();
+			lower_seqID[n] = packet_seqid_register[2 * (n + 1)].read();
+			lower_pass_count[n] = pass_count[2 * (n + 1)].read();
 		}
 		else{
 			lower_buffer_free[n] = (sc_bit)buffer_free[2 * n];
-			lower_clumped_unitid[n] = clumped_unitid_registers[2 * n];
-			lower_passPW[n] = packet_passpw_register[2 * n];
-			lower_seqID[n] = packet_seqid_register[2 * n];
-			lower_pass_count[n] = pass_count[2 * n];
+			lower_clumped_unitid[n] = clumped_unitid_registers[2 * n].read();
+			lower_passPW[n] = packet_passpw_register[2 * n].read();
+			lower_seqID[n] = packet_seqid_register[2 * n].read();
+			lower_pass_count[n] = pass_count[2 * n].read();
 		}
 	}
 
@@ -470,7 +470,7 @@ void nposted_vc_l3::update_internal_registers()
 		packet_addr_register[1] = packet_addr_register[0];
 		packet_passpw_register[1] = packet_passpw_register[0];
 		packet_seqid_register[1] = packet_seqid_register[0];
-		original_pass_count1 = pass_count[0];
+		original_pass_count1 = pass_count[0].read();
 		break;
 
 	case 2:
@@ -480,7 +480,7 @@ void nposted_vc_l3::update_internal_registers()
 		packet_addr_register[1] = packet_addr_register[2];
 		packet_passpw_register[1] = packet_passpw_register[2];
 		packet_seqid_register[1] = packet_seqid_register[2];
-		original_pass_count1 = pass_count[2];
+		original_pass_count1 = pass_count[2].read();
 		break;
 
 	default:
@@ -488,7 +488,7 @@ void nposted_vc_l3::update_internal_registers()
 		clumped_unitid_registers[1] = clumped_unitid_registers[1];
 		packet_addr_register[1] = packet_addr_register[1];
 		packet_passpw_register[1] = packet_passpw_register[1];
-		original_pass_count1 = pass_count[1];
+		original_pass_count1 = pass_count[1].read();
 		packet_seqid_register[1] = packet_seqid_register[1];
 	}
 
@@ -564,7 +564,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 2];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 2];
 			packet_seqid_register[2 * n + 3] = packet_seqid_register[2 * n + 2];
-			original_pass_count_pair = pass_count[2 * n + 2];
+			original_pass_count_pair = pass_count[2 * n + 2].read();
 			break;
 
 		case 8:
@@ -574,7 +574,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 4];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 4];
 			packet_seqid_register[2 * n + 3] = packet_seqid_register[2 * n + 4];
-			original_pass_count_pair = pass_count[2 * n + 4];
+			original_pass_count_pair = pass_count[2 * n + 4].read();
 			break;
 
 		case 12:
@@ -584,7 +584,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 1];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 1];
 			packet_seqid_register[2 * n + 3] = packet_seqid_register[2 * n + 1];
-			original_pass_count_pair = pass_count[2 * n + 1];
+			original_pass_count_pair = pass_count[2 * n + 1].read();
 			break;
 
 		default:
@@ -593,7 +593,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 3] = packet_addr_register[2 * n + 3];
 			packet_passpw_register[2 * n + 3] = packet_passpw_register[2 * n + 3];
 			packet_seqid_register[2 * n + 3] = packet_seqid_register[2 * n + 3];
-			original_pass_count_pair = pass_count[2 * n + 3];
+			original_pass_count_pair = pass_count[2 * n + 3].read();
 		}
 
 		bool increment_pair_pass_count;
@@ -632,7 +632,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 1];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 1];
 			packet_seqid_register[2 * n + 2] = packet_seqid_register[2 * n + 1];
-			original_pass_count_impair = pass_count[2 * n + 1];
+			original_pass_count_impair = pass_count[2 * n + 1].read();
 			break;
 
 		case 1:
@@ -642,7 +642,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 3];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 3];
 			packet_seqid_register[2 * n + 2] = packet_seqid_register[2 * n + 3];
-			original_pass_count_impair = pass_count[2 * n + 3];
+			original_pass_count_impair = pass_count[2 * n + 3].read();
 			break;
 
 		case 6:
@@ -652,7 +652,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n];
 			packet_seqid_register[2 * n + 2] = packet_seqid_register[2 * n];
-			original_pass_count_impair = pass_count[2 * n];
+			original_pass_count_impair = pass_count[2 * n].read();
 			break;
 
 		default:
@@ -661,7 +661,7 @@ void nposted_vc_l3::update_internal_registers()
 			packet_addr_register[2 * n + 2] = packet_addr_register[2 * n + 2];
 			packet_passpw_register[2 * n + 2] = packet_passpw_register[2 * n + 2];
 			packet_seqid_register[2 * n + 2] = packet_seqid_register[2 * n + 2];
-			original_pass_count_impair = pass_count[2 * n + 2];
+			original_pass_count_impair = pass_count[2 * n + 2].read();
 		}
 
 		bool increment_impair_pass_count;

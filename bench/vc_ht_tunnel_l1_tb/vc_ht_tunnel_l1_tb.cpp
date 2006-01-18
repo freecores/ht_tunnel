@@ -470,7 +470,7 @@ void vc_ht_tunnel_l1_tb::run(){
 }
 
 void vc_ht_tunnel_l1_tb::receivedHtPacketEvent(const ControlPacket * packet,
-								   const int * data,LogicalLayer* origin)
+								   const int * data,const LogicalLayer* origin)
 {
 	cout << "Received HT Packet: " << *packet << endl;
 	if(origin == logicalLayer0){ 

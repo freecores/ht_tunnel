@@ -302,7 +302,7 @@ public:
 
 	///Communication to HT Logical Interface, see LogicalLayerInterface
 	virtual void receivedHtPacketEvent(const ControlPacket * packet,
-		const int * data,LogicalLayer* origin);
+		const int * data,const LogicalLayer* origin);
 	///Communication to HT Logical Interface, see LogicalLayerInterface
     virtual void crcErrorDetected();
 
