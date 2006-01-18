@@ -22,7 +22,7 @@ vlib work
 # compile and link C source files
 
 #top Linking module
-sccom -g -D SYSTEMC_SIM -D MTI2_SYSTEMC testbenches/vc_ht_tunnel_l1_tb/main.cpp
+sccom -g -D SYSTEMC_SIM -D MTI2_SYSTEMC bench/vc_ht_tunnel_l1_tb/main.cpp
 
 #the testbench
 sccom -g -D SYSTEMC_SIM bench/vc_ht_tunnel_l1_tb/InterfaceLayer.cpp
@@ -77,12 +77,13 @@ sccom -g -D SYSTEMC_SIM rtl/systemc/flow_control_l2/flow_control_l2.cpp
 sccom -g -D SYSTEMC_SIM rtl/systemc/core_synth/synth_control_packet.cpp
 sccom -g -D SYSTEMC_SIM rtl/systemc/core_synth/synth_datatypes.cpp
 
-sccom -g -D SYSTEMC_SIM rtl/systemc/core/ControlPacket.cpp
-sccom -g -D SYSTEMC_SIM rtl/systemc/core/ht_datatypes.cpp
-sccom -g -D SYSTEMC_SIM rtl/systemc/core/PacketContainer.cpp
-sccom -g -D SYSTEMC_SIM rtl/systemc/core/RequestPacket.cpp
-sccom -g -D SYSTEMC_SIM rtl/systemc/core/ResponsePacket.cpp
+sccom -g -D SYSTEMC_SIM bench/core/ControlPacket.cpp
+sccom -g -D SYSTEMC_SIM bench/core/ht_datatypes.cpp
+sccom -g -D SYSTEMC_SIM bench/core/PacketContainer.cpp
+sccom -g -D SYSTEMC_SIM bench/core/RequestPacket.cpp
+sccom -g -D SYSTEMC_SIM bench/core/ResponsePacket.cpp
 
+sccom -g -D SYSTEMC_SIM rtl/systemc/vc_ht_tunnel_l1/misc_logic_l2.cpp
 sccom -g -D SYSTEMC_SIM rtl/systemc/vc_ht_tunnel_l1/vc_ht_tunnel_l1.cpp
 
 #final link
