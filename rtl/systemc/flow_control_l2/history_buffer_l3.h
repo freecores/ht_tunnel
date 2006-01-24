@@ -199,7 +199,7 @@ class history_buffer_l3 : public sc_module
 	sc_in <sc_uint<5> > new_history_entry_size_m1;
 	
 	///dword being sent to the link, so it can be stored in the buffer
-	sc_in<sc_bv<32> > fc_dword_lk;
+	sc_in<sc_bv<32> > mux_registered_output;
 
 	///When a nop was received : read the new ack_value
 	sc_in<bool>	nop_received;

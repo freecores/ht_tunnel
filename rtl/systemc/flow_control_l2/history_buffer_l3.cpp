@@ -54,7 +54,7 @@ history_buffer_l3::history_buffer_l3(sc_module_name name) : sc_module(name)
 		add_to_history <<
 		new_history_entry_size_m1 <<
 		write_pointer <<
-		fc_dword_lk <<
+		mux_registered_output <<
 		add_to_history <<
 		write_stop_pointer
 #ifdef PERMIT_CANCEL_HISTORY
@@ -166,7 +166,7 @@ void history_buffer_l3::write_in_memory(){
 	//else, send the data received at the input.  It will only be written if
 	//add_to_history is true.
 	else{
-		history_memory_write_data = fc_dword_lk.read();
+		history_memory_write_data = mux_registered_output.read();
 	}
 
 	//The adder to find the next value of next_write_stop_pointer is a freq bottleneck,

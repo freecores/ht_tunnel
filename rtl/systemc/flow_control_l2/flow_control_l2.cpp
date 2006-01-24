@@ -328,7 +328,7 @@ flow_control_l2::flow_control_l2(sc_module_name name) : sc_module(name)
 	the_history_buffer->stop_history_playback(stop_history_playback);
 	the_history_buffer->clk(clk);
 	the_history_buffer->consume_history(consume_history);
-	the_history_buffer->fc_dword_lk(fc_dword_lk);
+	the_history_buffer->mux_registered_output(mux_registered_output);
 	the_history_buffer->history_packet(history_packet);
 	the_history_buffer->history_playback_done(history_playback_done);
 	the_history_buffer->new_history_entry(new_history_entry);
