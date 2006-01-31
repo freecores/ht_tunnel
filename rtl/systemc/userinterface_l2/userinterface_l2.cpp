@@ -1003,7 +1003,7 @@ void userinterface_l2::send_freevc_user(){
 	//Don't allow anything to be sent if csr_bus_master_enable is false
 	if(!csr_bus_master_enable.read()){
 		freevc0_buf_usr_tmp = 0;
-		freevc0_buf_usr_tmp = 0;
+		freevc1_buf_usr_tmp = 0;
 	}
 
 	//Write to the output signal
