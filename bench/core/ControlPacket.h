@@ -232,8 +232,11 @@ public:
 	*/
 	static sc_bv<32> createAddressExtensionDoubleWord(sc_bv<24> &addressExtension);
 
+	///Get the internal data vector (constant version)
+	inline const sc_bv<64>& getVector() const {return bv;}
 	///Get the internal data vector
-	inline sc_bv<64> getVector() const {return bv;}
+	inline sc_bv<64>& getVector()  {return bv;}
+
 	///Get the internal data vector
 	inline operator sc_bv<64>() const {return bv;}
 	///Get the least significant 32 bits of the internal data vector
