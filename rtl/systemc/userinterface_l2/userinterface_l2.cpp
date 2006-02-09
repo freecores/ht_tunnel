@@ -280,7 +280,7 @@ void userinterface_l2::rx_process() {
 	//A simple temp variable that can be used locally
 	sc_bv<64> temp64;
 	bool chainIdleState = false;
-	ui_vc_usr_buf = VC_NONE;
+	ui_vc_usr_buf = ui_vc_usr;
 
 	//Default output values
 	next_ui_databuffer_access_granted_csr = false;
@@ -468,7 +468,7 @@ void userinterface_l2::rx_process() {
 			VirtualChannel	output_vc;
 
 			//Read control packet from side 0
-			if(readSide == 0){
+			if(readSide == 0 && (usr_consume_ui.read() || !output_loaded.read())){
 
 				ui_side_usr_buf = false;							//side0
 				ui_available_usr_buf = true;					//there is a control packet available
@@ -477,7 +477,7 @@ void userinterface_l2::rx_process() {
 				next_rx_rdcount_left = (sc_bv<4>)ro0_packet_ui_bits.range(25,22);
 
 				//If the user consumes the packet, we consume it from the buffer
-				ui_ack_ro0 = usr_consume_ui.read() || !output_loaded.read();
+				ui_ack_ro0 = true;
 
 				//Not consuming the opposite side!
 				ui_ack_ro1 = false;
@@ -490,23 +490,18 @@ void userinterface_l2::rx_process() {
 				//If there is any data associated with the control packet
 				if(ro0_packet_ui_data_associated){
 					//Go to a data_state
-					if(usr_consume_ui.read() || !output_loaded.read()){
-						/** A chain of posted packets means that posted packets
-						not from the chain may not be inserted in the chain.  We stay in
-						the chain state if the received packet is part of a chain or if
-						the packet is not posted but we are currently receiving a chain
-						(a chain can be interrupted by other VC's than poster)*/
-						if(ro0_packet_ui_chain || 
-								(ro0_packet_ui_vc != VC_POSTED && 
-								chainIdleState) ) 
-							rx_next_state = data0_chain_st;
-						else rx_next_state = data0_st;
-						//Not the end of the transmission of the packet/data yet!
-						ui_eop_usr_buf = false;
-					}
-					else{
-						rx_next_state = rx_current_state;
-					}
+					/** A chain of posted packets means that posted packets
+					not from the chain may not be inserted in the chain.  We stay in
+					the chain state if the received packet is part of a chain or if
+					the packet is not posted but we are currently receiving a chain
+					(a chain can be interrupted by other VC's than poster)*/
+					if(ro0_packet_ui_chain || 
+							(ro0_packet_ui_vc != VC_POSTED && 
+							chainIdleState) ) 
+						rx_next_state = data0_chain_st;
+					else rx_next_state = data0_st;
+					//Not the end of the transmission of the packet/data yet!
+					ui_eop_usr_buf = false;
 
 
 					//Pass packet information to the user
@@ -515,21 +510,16 @@ void userinterface_l2::rx_process() {
 				}
 				else{
 					//If a new packet can be stored in the output register
-					if(usr_consume_ui.read() || !output_loaded.read()){
-						/** A chain of posted packets means that posted packets
-						not from the chain may not be inserted in the chain.  We stay in
-						the chain state if the received packet is part of a chain or if
-						the packet is not posted but we are currently receiving a chain
-						(a chain can be interrupted by other VC's than poster)*/
-						if(ro0_packet_ui_chain || 
-							(ro0_packet_ui_vc != VC_POSTED && 
-									chainIdleState))
-							rx_next_state = rx_idle_chain0_st;
-						else rx_next_state = rx_idle_pref1_st;
-					}
-					else{
-						rx_next_state = rx_current_state;						
-					}
+					/** A chain of posted packets means that posted packets
+					not from the chain may not be inserted in the chain.  We stay in
+					the chain state if the received packet is part of a chain or if
+					the packet is not posted but we are currently receiving a chain
+					(a chain can be interrupted by other VC's than poster)*/
+					if(ro0_packet_ui_chain || 
+						(ro0_packet_ui_vc != VC_POSTED && 
+								chainIdleState))
+						rx_next_state = rx_idle_chain0_st;
+					else rx_next_state = rx_idle_pref1_st;
 					ui_eop_usr_buf = true;
 
 					//Don't care for VC!
@@ -543,7 +533,7 @@ void userinterface_l2::rx_process() {
 			}
 
 			//Read control packet from side 1
-			else if(readSide == 1){
+			else if(readSide == 1  && (usr_consume_ui.read() || !output_loaded.read())){
 
 				ui_side_usr_buf = true;							//side1
 				next_output_loaded = true;
@@ -552,7 +542,7 @@ void userinterface_l2::rx_process() {
 				next_rx_rdcount_left = (sc_bv<4>)ro1_packet_ui_bits.range(25,22);
 
 				//If the user consumes the packet, we consume it from the buffer
-				ui_ack_ro1 = usr_consume_ui.read() || !output_loaded.read();
+				ui_ack_ro1 = true;
 
 				//Not consuming the opposite side!
 				ui_ack_ro0 = false;
@@ -565,23 +555,18 @@ void userinterface_l2::rx_process() {
 				//If there is any data associated with the control packet
 				if(ro1_packet_ui_data_associated){
 
-					if(usr_consume_ui.read() || !output_loaded.read()){
-						/** A chain of posted packets means that posted packets
-						not from the chain may not be inserted in the chain.  We stay in
-						the chain state if the received packet is part of a chain or if
-						the packet is not posted but we are currently receiving a chain
-						(a chain can be interrupted by other VC's than poster)*/
-						if(ro1_packet_ui_chain || 
-								(ro1_packet_ui_vc != VC_POSTED && 
-								chainIdleState) ) 
-							rx_next_state = data1_chain_st;
-						else rx_next_state = data1_st;
-						//Not the end of the transmission of the packet/data yet!
-						ui_eop_usr_buf = false;
-					}
-					else{
-						rx_next_state = rx_current_state;
-					}
+					/** A chain of posted packets means that posted packets
+					not from the chain may not be inserted in the chain.  We stay in
+					the chain state if the received packet is part of a chain or if
+					the packet is not posted but we are currently receiving a chain
+					(a chain can be interrupted by other VC's than poster)*/
+					if(ro1_packet_ui_chain || 
+							(ro1_packet_ui_vc != VC_POSTED && 
+							chainIdleState) ) 
+						rx_next_state = data1_chain_st;
+					else rx_next_state = data1_st;
+					//Not the end of the transmission of the packet/data yet!
+					ui_eop_usr_buf = false;
 
 
 					//Pass packet information to the user
@@ -590,21 +575,16 @@ void userinterface_l2::rx_process() {
 				}
 				//If there are no data
 				else{
-					if(usr_consume_ui.read() || !output_loaded.read()){
-						/** A chain of posted packets means that posted packets
-						not from the chain may not be inserted in the chain.  We stay in
-						the chain state if the received packet is part of a chain or if
-						the packet is not posted but we are currently receiving a chain
-						(a chain can be interrupted by other VC's than poster)*/
-						if(ro1_packet_ui_chain || 
-								(ro1_packet_ui_vc && 
-								chainIdleState))
-							rx_next_state = rx_idle_chain1_st;
-						else rx_next_state = rx_idle_pref0_st;
-					}
-					else{
-						rx_next_state = rx_current_state;						
-					}
+					/** A chain of posted packets means that posted packets
+					not from the chain may not be inserted in the chain.  We stay in
+					the chain state if the received packet is part of a chain or if
+					the packet is not posted but we are currently receiving a chain
+					(a chain can be interrupted by other VC's than poster)*/
+					if(ro1_packet_ui_chain || 
+							(ro1_packet_ui_vc && 
+							chainIdleState))
+						rx_next_state = rx_idle_chain1_st;
+					else rx_next_state = rx_idle_pref0_st;
 
 					ui_eop_usr_buf = true;
 
@@ -620,14 +600,12 @@ void userinterface_l2::rx_process() {
 			}
 			//If there are no packets available from either side
 			else{
-				ui_side_usr_buf = false;
-				ui_available_usr_buf = output_loaded.read() && !usr_consume_ui.read();
+				ui_side_usr_buf = ui_side_usr;
+				ui_available_usr_buf = false;
 				next_output_loaded = output_loaded.read() && !usr_consume_ui.read();
 				ui_eop_usr_buf = output_loaded.read() && !usr_consume_ui.read();
 
-				//Bit vector takes don't care value
-				//For clarity, here it is put at 0
-				output_bits = 0;
+				//Bit vector stays the same (default action)
 				rx_next_state = rx_current_state;
 				ui_ack_ro0 = false;
 				ui_ack_ro1 = false;
@@ -639,7 +617,6 @@ void userinterface_l2::rx_process() {
 				ui_address_db1 = sc_uint<BUFFERS_ADDRESS_WIDTH>(0);
 				ui_vctype_db0 = VC_NONE;
 				ui_vctype_db1 = VC_NONE;
-				output_vc = VC_NONE;
 			}
 
 			ui_packet_usr_buf = output_bits;	//send the actual packet
