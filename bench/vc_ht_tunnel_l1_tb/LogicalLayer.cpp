@@ -502,6 +502,7 @@ void LogicalLayer::dwordToSendRequested(sc_bv<32> &dword,bool &lctl,bool &hctl){
 					send_state = SEND_SECOND_DWORD;
 				}
 				else if(has_data){
+					sendDataCount = 0;
 					send_state = SEND_DATA;
 				}
 				else if(retry_mode){
